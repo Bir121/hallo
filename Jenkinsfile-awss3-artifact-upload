@@ -1,0 +1,33 @@
+pipeline {
+    agent any
+    tools{
+        maven 'local_maven'
+    }
+
+    stages {
+         stage("GIT checkout") {
+            steps {
+                 git branch: 'master', url: 'https://github.com/priyabratswain009/boxfuse-sample-java-war-hello.git'
+                }
+            }
+         
+         stage('builds'){
+             steps{
+                 
+                 sh 'mvn clean package'
+                 
+               }
+             }
+             
+       
+         stage('upload-artifact') {
+ 
+            steps {
+               withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws_id', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                    sh "aws s3 cp ./target/hello-1.0.war s3://aws-hello-priya/priya/"
+                    
+                       }
+    }
+  }
+    }
+}
